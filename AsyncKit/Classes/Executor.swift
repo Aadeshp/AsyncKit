@@ -9,11 +9,11 @@
 import UIKit
 
 /// Service that executes a block in the specified executor queue
-public class Executor {
+internal class Executor {
     /// Queue to execute block in
     private var type: ExecutorType!
     
-    public init(type: ExecutorType) {
+    internal init(type: ExecutorType) {
         self.type = type
     }
     
@@ -23,11 +23,11 @@ public class Executor {
      - parameter type: Executor queue to execute block in
      - parameter block: Block to execute
      */
-    public func execute(type: ExecutorType!, block: dispatch_block_t) {
-        let _ = self.executionBlock(block)
+    internal func execute(block: dispatch_block_t) {
+        self.executionBlock(block)()
     }
     
-    public func executionBlock<T>(block: (T) -> Void) -> ((T) -> Void) {
+    internal func executionBlock<T>(block: (T) -> Void) -> ((T) -> Void) {
         let wrappedBlock = { (t: T) -> Void in
             block(t)
         }
@@ -40,8 +40,7 @@ public class Executor {
         }
     }
     
-    private func createDispatchBlock<T>(queue: AKQueue, block: (T) -> Void) -> ((T) -> Void)
-    {
+    private func createDispatchBlock<T>(queue: AKQueue, block: (T) -> Void) -> ((T) -> Void) {
         let wrappedBlock = { (t: T) -> Void in
             queue.async {
                 block(t)
@@ -67,7 +66,7 @@ public enum ExecutorType {
     case Queue(dispatch_queue_t)
     
     /// Gets queue object based on ExecutorType
-    public var queue: AKQueue {
+    internal var queue: AKQueue {
         get {
             switch(self) {
             case .Main:
