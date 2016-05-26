@@ -5,11 +5,15 @@
 [![License](https://img.shields.io/cocoapods/l/AsyncKit.svg?style=flat)](http://cocoapods.org/pods/AsyncKit)
 [![Platform](https://img.shields.io/cocoapods/p/AsyncKit.svg?style=flat)](http://cocoapods.org/pods/AsyncKit)
 
-## Example
+Brings the power of promises/futures to iOS development in the form of Tasks
+
+## Get Started
+
+Check out the thorough [AsyncKit documentation](https://aadeshp.github.io/async-kit#docs)
+
+## Example 
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
-
-## Requirements
 
 ## Installation
 
@@ -22,7 +26,7 @@ pod "AsyncKit"
 
 ## Author
 
-aadesh, aadeshp95@gmail.com
+Aadesh Patel, aadeshp95@gmail.com
 
 ## License
 
