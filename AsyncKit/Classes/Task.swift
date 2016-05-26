@@ -17,6 +17,7 @@ public func task<T>(block: () throws -> T) -> Task<T> {
             let ret = try block()
             manager.complete(ret)
         } catch {
+            print("HERE")
             manager.completeWithError(error)
         }
     }
@@ -213,6 +214,16 @@ public class Task<T> {
         self.queueTaskCallback { (result: TaskResult<T>) -> Void in
             if (result.error != nil) {
                 block(result.error)
+            }
+        }
+        
+        return self
+    }
+    
+    public func error(block: (ErrorType) -> Void) -> Task<T> {
+        self.queueTaskCallback { (result: TaskResult<T>) -> Void in
+            if (result.errorType != nil) {
+                block(result.errorType)
             }
         }
         
