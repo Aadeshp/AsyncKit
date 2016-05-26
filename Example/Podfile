@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'AsyncKit_Example' do
+  pod 'AsyncKit', :path => '../'
+
+  target 'AsyncKit_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
