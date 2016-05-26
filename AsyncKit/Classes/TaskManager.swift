@@ -34,6 +34,12 @@ public class TaskManager<T> {
         }
     }
     
+    public func completeWithError(error: ErrorType) {
+        synchronized(self) {
+            self.task.completeWithResult(.FailWithErrorType(error))
+        }
+    }
+    
     public func completeWithException(exception: NSException) {
         synchronized(self) {
             self.task.completeWithResult(.FailWithException(exception))

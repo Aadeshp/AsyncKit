@@ -8,11 +8,17 @@
 
 import Foundation
 
-public func task<T>(block: () -> T) -> Task<T> {
-    let manager: TaskManager<T> = TaskManager()
+public func task<T>(block: () throws -> T) -> Task<T> {
+    let manager = TaskManager<T>()
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-        manager.complete(block())
+    let executor = Executor(type: .Async)
+    executor.execute {
+        do {
+            let ret = try block()
+            manager.complete(ret)
+        } catch {
+            manager.completeWithError(error)
+        }
     }
     
     return manager.task
@@ -38,6 +44,9 @@ public enum TaskResult<T> {
     /// Task failed with an error
     case FailWithError(NSError)
     
+    /// Task failed with an error type
+    case FailWithErrorType(ErrorType)
+    
     /// Task failed with an exception
     case FailWithException(NSException)
     
@@ -59,6 +68,8 @@ public enum TaskResult<T> {
         get {
             switch(self) {
             case .FailWithError:
+                return true
+            case .FailWithErrorType:
                 return true
             case .FailWithException:
                 return true
@@ -94,6 +105,17 @@ public enum TaskResult<T> {
         get {
             switch(self) {
             case let .FailWithError(e):
+                return e
+            default:
+                return nil
+            }
+        }
+    }
+    
+    public var errorType: ErrorType! {
+        get {
+            switch(self) {
+            case let .FailWithErrorType(e):
                 return e
             default:
                 return nil
@@ -146,13 +168,16 @@ public class Task<T> {
         let manager = TaskManager<K>()
         
         self.then(executorType) { (ret: T) in
-            let task = block(ret)
-            task.then { ret2 in
+            let nextTask = block(ret)
+            
+            nextTask.then { ret2 in
                 manager.complete(ret2)
-                }.error { (error: NSError) in
-                    manager.completeWithError(error)
-                }.error { (ex: NSException) in
-                    manager.completeWithException(ex)
+            }.error { (error: NSError) in
+                manager.completeWithError(error)
+            }.error { (error: ErrorType) in
+                manager.completeWithError(error)
+            }.error { (ex: NSException) in
+                manager.completeWithException(ex)
             }
         }
         
@@ -174,6 +199,8 @@ public class Task<T> {
                 return block(result.result)
             case .FailWithError:
                 return .FailWithError(result.error)
+            case .FailWithErrorType:
+                return .FailWithErrorType(result.errorType)
             case .FailWithException:
                 return .FailWithException(result.exception)
             case .Cancel:
@@ -211,7 +238,6 @@ public class Task<T> {
     }
     
     private func taskForBlock<K>(executor: Executor, _ block: (TaskResult<T>) -> TaskResult<K>) -> Task<K> {
-        
         let taskManager: TaskManager<K> = TaskManager<K>()
         let taskCallback: ((TaskResult<T>) -> Void) = { (result: TaskResult<T>) -> Void in
             taskManager.complete(block(result))
@@ -273,17 +299,21 @@ extension Task {
         tasks.forEach { task in
             task.then(.Current) { (Void) -> Void in
                 
-                }.error { (error: NSError) in
-                    numErrors.value += 1
-                }.finally {
-                    numTasks.value -= 1
-                    guard numTasks.value == 0 else { return }
+            }.error { (error: NSError) in
+                numErrors.value += 1
+            }.error { (error: ErrorType) in
+                numErrors.value += 1
+            }.error { (ex: NSException) in
+                numErrors.value += 1
+            }.finally {
+                numTasks.value -= 1
+                guard numTasks.value == 0 else { return }
                     
-                    if (numErrors.value > 0) {
-                        manager.completeWithError(NSError(domain: "Task Error", code: 0, userInfo: nil))
-                    } else {
-                        manager.complete()
-                    }
+                if (numErrors.value > 0) {
+                    manager.completeWithError(NSError(domain: "Task Error", code: 0, userInfo: nil))
+                } else {
+                    manager.complete()
+                }
             }
         }
         
