@@ -1,0 +1,16 @@
+PODS:
+  - AsyncKit (0.1.0)
+
+DEPENDENCIES:
+  - AsyncKit (from `../`)
+
+EXTERNAL SOURCES:
+  AsyncKit:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  AsyncKit: d490d0b5c33699278184fd1c43cb7774a0a40839
+
+PODFILE CHECKSUM: 75edc7c43150316a20a7aeb476e2d634cbc5fe1f
+
+COCOAPODS: 1.0.0.beta.8
