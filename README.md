@@ -1,7 +1,6 @@
 # AsyncKit
 
 [![CI Status](http://img.shields.io/travis/aadesh/AsyncKit.svg?style=flat)](https://travis-ci.org/aadesh/AsyncKit)
-[![Version](https://img.shields.io/cocoapods/v/AsyncKit.svg?style=flat)](http://cocoapods.org/pods/AsyncKit)
 [![License](https://img.shields.io/cocoapods/l/AsyncKit.svg?style=flat)](http://cocoapods.org/pods/AsyncKit)
 [![Platform](https://img.shields.io/cocoapods/p/AsyncKit.svg?style=flat)](http://cocoapods.org/pods/AsyncKit)
 
