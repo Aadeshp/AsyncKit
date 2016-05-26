@@ -8,17 +8,17 @@
 
 import UIKit
 
-public class TaskQueue<T> {
-    public typealias QueueMapBlock = (item: T?) -> Void
+internal class TaskQueue<T> {
+    internal typealias QueueMapBlock = (item: T?) -> Void
     
     private var tail: Node<T>?
     private(set) public var count: Int = 0
     
-    public init() {
+    internal init() {
         self.tail = nil
     }
     
-    public func enqueue(item: T) {
+    internal func enqueue(item: T) {
         self.count += 1
         
         if (self.tail == nil) {
@@ -32,7 +32,7 @@ public class TaskQueue<T> {
         self.tail = temp
     }
     
-    public func dequeue() -> T? {
+    internal func dequeue() -> T? {
         let result: T? = tail?.next?.value
         tail?.next = tail?.next?.next
         
@@ -41,7 +41,7 @@ public class TaskQueue<T> {
         return result
     }
     
-    public func map(block: QueueMapBlock) {
+    internal func map(block: QueueMapBlock) {
         if (self.count == 0) {
             return
         }
@@ -61,7 +61,7 @@ public class TaskQueue<T> {
         }
     }
     
-    public func clear() {
+    internal func clear() {
         self.tail = nil
         self.count = 0
     }
