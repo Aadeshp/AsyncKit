@@ -8,6 +8,13 @@
 
 import Foundation
 
+/**
+ Builds and returns a Task object from the block provided
+ 
+ - parameter block: Closure to execute asynchronously
+ 
+ - returns: Task object with the same type as the result of the block parameter
+ */
 public func task<T>(block: () throws -> T) -> Task<T> {
     let manager = TaskManager<T>()
     
@@ -17,7 +24,6 @@ public func task<T>(block: () throws -> T) -> Task<T> {
             let ret = try block()
             manager.complete(ret)
         } catch {
-            print("HERE")
             manager.completeWithError(error)
         }
     }
@@ -25,6 +31,7 @@ public func task<T>(block: () throws -> T) -> Task<T> {
     return manager.task
 }
 
+/// Simple wrapper class of a task's result
 public class TaskResultWrapper<T> {
     private var result: T!
     
@@ -165,6 +172,15 @@ public class Task<T> {
         }
     }
     
+    /**
+     Closure to execute if the task is completed successfully
+     
+     - parameter executorType: Queue to run the block in
+     - parameter block: Task returning closure that executes within the queue determined by the executorType 
+                        parameter, only if the task is completed successfully
+     
+     - returns: Task object of the result of the closure provided
+     */
     public func then<K>(executorType: ExecutorType = ExecutorType.Current, _ block: ((T) -> Task<K>)) -> Task<K> {
         let manager = TaskManager<K>()
         
@@ -185,6 +201,15 @@ public class Task<T> {
         return manager.task
     }
     
+    /**
+     Closure to execute if the task is completed successfully
+     
+     - parameter executorType: Queue to run the block in
+     - parameter block: Closure that executes within the queue determined by the executorType parameter, 
+                        only if the task is completed successfully
+     
+     - returns: Task object of the result of the closure provided
+     */
     public func then<K>(executorType: ExecutorType = ExecutorType.Current, _ block: ((T) -> K)) -> Task<K> {
         let executor: Executor = Executor(type: executorType)
         
@@ -210,6 +235,13 @@ public class Task<T> {
         }
     }
     
+    /**
+     Closure to execute if the task fails with an error of type NSError
+     
+     - parameter block: Closure that executes only if the task fails with an error of type NSError
+     
+     - returns: Self Task object
+     */
     public func error(block: (NSError) -> Void) -> Task<T> {
         self.queueTaskCallback { (result: TaskResult<T>) -> Void in
             if (result.error != nil) {
@@ -219,7 +251,14 @@ public class Task<T> {
         
         return self
     }
-    
+   
+    /**
+     Closure to execute if the task fails with an error of type ErrorType
+     
+     - parameter block: Closure that executes only if the task fails with an error of type ErrorType
+     
+     - returns: Self Task object
+     */
     public func error(block: (ErrorType) -> Void) -> Task<T> {
         self.queueTaskCallback { (result: TaskResult<T>) -> Void in
             if (result.errorType != nil) {
@@ -230,6 +269,13 @@ public class Task<T> {
         return self
     }
     
+    /**
+     Closure to execute if the task fails with an exception
+     
+     - parameter block: Closure that executes only if the task fails with an exception
+    
+     - returns: Self Task object
+     */
     public func error(block: (NSException) -> Void) -> Task<T> {
         self.queueTaskCallback { (result: TaskResult<T>) -> Void in
             if (result.exception != nil) {
@@ -240,6 +286,14 @@ public class Task<T> {
         return self
     }
     
+    /**
+     Closure that always executes after a task is completed, regardless of whether or not the task
+     was a success or failure
+     
+     - parameter block: Closure that always executes after a task is completed
+     
+     - returns: Self Task object
+     */
     public func finally(block: () -> Void) -> Task<T> {
         self.queueTaskCallback { (_: TaskResult<T>) -> Void in
             block()
@@ -294,7 +348,7 @@ extension Task {
      - parameter tasks: Tasks to complete simultaneously
      
      - returns: Void Task object that becomes available only when all input tasks
-     have been completed
+                have been completed
      */
     public static func join(tasks: Task...) -> Task<Void> {
         let manager = TaskManager<Void>()
